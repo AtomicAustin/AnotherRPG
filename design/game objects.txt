@@ -1,0 +1,36 @@
+	**OBJECTS**
+
+Objects:
+	Base class for game objects
+
+	.Animator
+	.Collider
+
+Player:
+	Single class for the player
+
+	.Movement
+	.Hitbox
+	.Health
+	.Weapons
+
+Enemy:
+	Basic enemy class
+
+	.Movement
+	.Hitbox
+	.AI
+	.Health
+	.Weapons
+	.Loot
+
+Scenery:
+	Non-touchable scenery objects
+
+	+Lights
+	+Boxes/Crates
+
+Items:
+	Base class for anything that can be picked up
+	
+	.Hitbox

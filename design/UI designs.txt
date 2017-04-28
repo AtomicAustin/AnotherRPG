@@ -1,0 +1,36 @@
+UI
+
+Game Console:
+will display text from the game to the player through sfml strings
+size = 54, 19 
+scale to: 544, 192
+position = 0, 576
+
+Player Stats:
+display player health and icon
+size = 54, 19 
+scale to: 544, 192
+position = 540, 576
+
+Tooltip:
+display information based on mouse over -- might not use
+size = 192, 192
+position = 1088, 576
+
+Inventory:
+displays picked up items -- might not use
+size = 192, 336
+position = 1088, 240
+
+Toolbar:
+displays menu options -- might not use
+size = 192,48
+position = 1088, 192
+
+Map:
+displays the full map and level/room position
+size = 192,192
+position = 1088, 0
+mapview:
+	size = full map size
+	viewport = 1088, 0, .15, .15

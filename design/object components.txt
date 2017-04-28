@@ -1,0 +1,48 @@
+	**OBJECT COMPONENTS**
+
+
+
+Collider:
+	
+Handles all collision detection
+
+
+	.Check object collision
+	
+
+
+Animator:
+	
+Iterates the sprites over their sprite sheet
+
+
+	.Move direction
+	.Standing
+	.Attack
+	.Dead
+
+Movement:
+	Moves objects
+
+	.Move direction
+
+Hitbox
+
+:
+	A box used for interaction
+
+	.Move box
+
+AI:
+	Generic AI component
+
+	.Move
+	.Detect
+	.Attack
+	.Dead
+
+Health:
+	Tracks health
+
+	.Update health
+	.Get health

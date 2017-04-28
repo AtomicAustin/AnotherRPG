@@ -1,0 +1,133 @@
+Interfaces:
+	Interfaces are made of control instructions that are decided
+	by the user. Interfaces contain certain systems/components 
+	and delegate where data goes. They also handle all updates to components
+	and the window.
+
+Systems:
+	Systems take data from components and modify it appropriately. 
+	Systems can return data to the interface to be sent back to a 
+	component.
+
+Components:
+	Contain data and are contained in vectors within interfaces
+
+
+
+	***Basic Level Interface***
+Control:
+	Get user Input
+	Decide what action is being made
+	Decide what data is needed
+	Decide what systems will be used
+	Fetch the data from components
+	Give data to the proper systems
+	Take data from the systems' outputs
+	Decide what data needs to be updated
+	Update the component's data
+	Update the window
+	Return to user
+
+Systems:
+	Move object
+	Move player
+	Move enemy
+	Move NPC
+	Check if object is colliding
+	Attack Enemy
+	Attack Player
+	Talk to NPC
+	Open pause menu
+	Open Inventory
+	Open Dialogue
+	Open Trade
+	Open Craft
+	Move view
+	Animate player
+	Animate enemy
+	Animate NPC
+	Drop item
+	Pick up item
+	Adjust UI
+	...
+
+Components:
+	Enemy
+	Player
+	NPC
+	Window
+	View
+	Objects
+	Collision
+	Animate
+	GUI
+	Items
+	UI
+	...
+
+
+	***Main Menu Interface***
+Interfaces:
+	Hubworld
+	Designer
+	Options
+
+Components:
+	System information
+	GUI systems
+
+
+	***HubWorld Interface***
+Systems:
+	Get player Progress
+	Move object
+	Move player
+	Move NPC
+	Check if object is colliding
+	Talk to NPC
+	Open pause menu
+	Open Inventory
+	Open Dialogue
+	Open Trade
+	Open Craft
+	Move view
+	Animate player
+	Animate NPC
+	Drop item
+	Pick up item
+	Adjust UI
+	...
+
+Components:
+	Player
+	Progress
+	NPC
+	Window
+	GUI systems
+	Animate
+	Items
+	UI
+	...
+
+	***Designer Interface***
+Systems:
+	Update states
+	Check mouse
+	Add shape
+	Adjust view
+	Delete shape
+	Resize
+	Drag
+	Rotate
+	Open pause menu
+	Save shapes
+	Load shapes
+	...
+
+Components:
+	Shapes
+	Mouse
+	Save
+	Load
+	GUI systems
+	...

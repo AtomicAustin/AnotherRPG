@@ -1,0 +1,38 @@
+	**GAME COMPONENTS**
+View:
+	Adjusts the map view focused on the player
+
+	.Update displayed
+	.Move camera
+
+UI:
+	Updates/displays a UI component
+	.set up
+	.Update(item)
+	.display
+	+GameConsole
+	+PlayerStats
+	+Map
+	+Toolbar
+	+Tooltip
+	+Inventory
+
+ObjectSystem:
+	Manages all game objects
+	.Set tag
+	.Get tag
+	.Get object
+	.Add object
+	.Remove object
+	+Enemies
+	+Scenery
+
+ItemSystem:
+	Manages all items dropped
+	.Set tag
+	.Get tag
+	.Get Item
+	.Add Item
+	.Remove Item
+	+Hearts
+	

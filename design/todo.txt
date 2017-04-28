@@ -1,0 +1,26 @@
+::Needs done::
+
+directional/movement animations
+ .enemy pathing  
+  .design combat
+
+item system (health potions)
+  .enemy death system
+  .inventory UI
+
+player stats UI display (player icon)
+
+player death system
+  .level resets
+
+gameobject animation
+  .movement (directions)
+  .attacks
+  .deaths
+
+create more maps
+  .design random room system
+
+design save/load
+
+**First stage done**
