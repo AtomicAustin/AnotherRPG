@@ -2,32 +2,88 @@
 
 Movement::Movement()
 {}
-Movement::Movement(sf::Sprite* new_sprite)
+Movement::Movement(sf::Sprite* n_sprite)
 {
-	obj_sprite = new_sprite;
+	obj_sprite = n_sprite;
 }
-void Movement::move(int direction)
+void Movement::move(MoveDirections dir)
 {
-	//[-2,-1,1,2] - [up,left,right,down]
-	switch (direction)
+	switch (dir)
 	{
-		case -2:{
-			obj_sprite->move(sf::Vector2f(0, -16));
-			break;
+	case UP: { obj_sprite->move(sf::Vector2f(0, -16));break;}
+	case LEFT: { obj_sprite->move(sf::Vector2f(-16, 0));break;}
+	case RIGHT: { obj_sprite->move(sf::Vector2f(16, 0));break;}
+	case DOWN: { obj_sprite->move(sf::Vector2f(0, 16));break;}
+	}
+	
+	lastMove = dir;
+}
+void Movement::moveHitbox(MoveDirections dir, sf::Vector2f& n_hitbox)
+{
+	switch (dir)
+	{
+	case UP: { n_hitbox.y += -16;break;}
+	case LEFT: { n_hitbox.x += -16;break;}
+	case RIGHT: { n_hitbox.x += 16;break;}
+	case DOWN: { n_hitbox.y += 16;break;}
+	}
+}
+void Movement::moveBackHitbox(MoveDirections dir, sf::Vector2f& n_hitbox)
+{
+	switch (dir)
+	{
+	case UP: {n_hitbox.y += 16; break; }
+	case DOWN: {n_hitbox.y -= 16; break; }
+	case LEFT: {n_hitbox.x += 16; break; }
+	case RIGHT: {n_hitbox.x -= 16; break; }
+	}
+}
+MoveDirections Movement::takeXY(sf::Vector2f m_hitbox, sf::Vector2f n_hitbox)
+{
+	xDiff = m_hitbox.x - n_hitbox.x;
+	yDiff = m_hitbox.y - n_hitbox.y;
+
+	if (abs(xDiff) >= abs(yDiff)) {
+		//take X
+		if (xDiff > 0) {
+			lastMove = LEFT;
 		}
-		case -1:{
-			obj_sprite->move(sf::Vector2f(-16, 0));
-			break;
-		}
-		case 1:{
-			obj_sprite->move(sf::Vector2f(16, 0));
-			break;
-		}
-		case 2:{
-			obj_sprite->move(sf::Vector2f(0, 16));
-			break;
+		else {
+			lastMove = RIGHT;
 		}
 	}
+	else {
+		//take Y
+		if (yDiff > 0) {
+			lastMove = UP;
+		}
+		else {
+			lastMove = DOWN;
+		}
+	}
+
+	return lastMove;
+}
+MoveDirections Movement::retakeXY()
+{
+	if (lastMove == DOWN || UP) {
+		if (xDiff > 0) {
+			lastMove = RIGHT;
+		}
+		else {
+			lastMove = LEFT;
+		}
+	}
+	else {
+		if (yDiff > 0) {
+			lastMove = UP;
+		}
+		else {
+			lastMove = DOWN;
+		}
+	}
+
+	return lastMove;
 }
 Movement::~Movement()
 {

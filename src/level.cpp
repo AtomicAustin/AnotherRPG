@@ -7,7 +7,7 @@
 
 Level::Level()
 {}
-Level::Level(int level_num) : cur_level(level_num),	totalRooms(0), roomIter(0), collided_with(0), nextLevel(false), totalEnemies(0)
+Level::Level(int level_num) : cur_level(level_num),	totalRooms(0), roomIter(0), main_ret(2), totalEnemies(0)
 {
 	levelView.reset(sf::FloatRect(0, 0, 250, 150));
 	levelView.setViewport(sf::FloatRect(0, 0, .85, .75));
@@ -66,18 +66,27 @@ void Level::addRoom(RoomInstructions n_room, std::vector<EnemyInstructions> n_en
 
 	allEnemies.push_back(n_enemies);
 }
-int Level::runLevel(sf::RenderWindow* gameWindow)
+int Level::runLevel(sf::RenderWindow* gameWindow, PlayerInstructions p_inst)
 {
-	gameView = gameWindow->getDefaultView();
+	g_window = gameWindow;
+	gameView = g_window->getDefaultView();
+
+	gameOver.setSize(sf::Vector2f(g_window->getSize().x, g_window->getSize().y));
+	gameOver.setPosition(0, 0);
+	sf::Color go_Color = sf::Color(255, 255, 255, 0);
+	gameOver.setFillColor(go_Color);
 
 	currentRoom = new Room(allRooms[roomIter]);
 
 	m_collider = new Collider(currentRoom->getWalls(), currentRoom->getEntrances(), currentRoom->getExits());
-	player.setUp("player/BuffNerd(16x16).png", sf::Vector2i(16,16), "Buff Nerd", m_collider);
+	player.setUp(p_inst, m_collider);
 	player.setPosition(currentRoom->getMainEntrance());
+	//attack = player.getattackiterator
+	attack = 0;
+	to_hit = -1;
 
 	m_console.create("UI/gameconsole.png", sf::Vector2f(0, 576));
-	m_pstats.create("UI/playerStats.png", sf::Vector2f(540, 576), player.getCurHealth());
+	m_pstats.create("UI/playerStats.png", p_inst.portrait_file_name, sf::Vector2f(540, 576), player.getCurHealth());
 	m_minimap.create("UI/minimap.png", sf::Vector2f(1088, 0), std::to_string(cur_level), std::to_string(roomIter + 1));
 	updateMiniMap();
 
@@ -86,97 +95,156 @@ int Level::runLevel(sf::RenderWindow* gameWindow)
 
 	sf::Clock messageGen;
 
-	while (gameWindow->isOpen())
+	while (g_window->isOpen())
 	{
-		if (clock.getElapsedTime().asSeconds() > .25) 
-		{
-			//[-2,-1,1,2] - [up,left,right,down]
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-				collided_with = player.move(-2);
-				clock.restart();
-				adjustView();
-			}
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-				collided_with = player.move(2);
-				clock.restart();
-				adjustView();
-			}
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-				collided_with = player.move(-1);
-				clock.restart();
-				adjustView();
-			}
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-				collided_with = player.move(1);
-				clock.restart();
-				adjustView();
-			}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+			attack = 4;
 		}
-
-		if (collided_with == 4) {
-			int to_kill = m_collider->getPcollidedwith();
-			//std::cout << "Enemy #" << to_kill + 1 << ", Vector size: " << totalEnemies << std::endl;
-			m_console.sendMessage("Killed " + enemies[to_kill]->getName());
-			kill(to_kill);
+		//[-2,-1,1,2] - [up,left,right,down]
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			player.move(UP);
+			adjustView();
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			player.move(DOWN);
+			adjustView();
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+			player.move(LEFT);
+			adjustView();
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+			player.move(RIGHT);
+			adjustView();
 		}
 
 		sf::Event event;
-		while (gameWindow->pollEvent(event)){
+		while (g_window->pollEvent(event)){
 			if (event.type == sf::Event::Closed)
-				gameWindow->close();
-		}
-
-		if (e_clock.getElapsedTime().asSeconds() > 1) {
-			for (int i = 0; i < totalEnemies; i++) {
-				if (enemies[i]->move() == 1) {
-					int hpLost = rand() % 10 + 5;
-					m_console.sendMessage(enemies[i]->getName() + " attacked you for " + std::to_string(hpLost) + " damage!");
-					player.removeHealth(hpLost);
-					m_pstats.updateHealth(player.getCurHealth());
-				}
-			}
-			e_clock.restart();	
+				g_window->close();
 		}
 
 		if (roomChangeClock.getElapsedTime().asSeconds() > 3){
-			if (collided_with > 0 && collided_with < 3){
-				nextLevel = changeRoom();
+			if (m_collider->getPcollidedwith() > 1 && m_collider->getPcollidedwith() < 4){
+				main_ret = changeRoom(m_collider->getPcollidedwith());
 			}
 		}
 
-		if (nextLevel) {
-			return 1;
+		update();
+
+		switch (main_ret)
+		{
+			case -1: return main_ret;
+			case 0: { killPlayer();  return main_ret; }
+			case 1: return main_ret;
 		}
-
-		updateCollider();
-
-		gameWindow->clear();
-
-		gameWindow->setView(gameView);
-		//GUIs
-		gameWindow->draw(m_console);
-		gameWindow->draw(m_pstats);
-		//still just rects
-		gameWindow->draw(Tooltip);
-		gameWindow->draw(Inventory);
-		gameWindow->draw(Toolbar);
-
-		gameWindow->draw(m_minimap);
-		
-		gameWindow->setView(mm_view);
-		gameWindow->draw(*currentRoom);
-
-		gameWindow->setView(levelView);
-		gameWindow->draw(*currentRoom);
-		gameWindow->draw(player);
-		for (int i = 0; i < totalEnemies; i++) {
-			gameWindow->draw(*enemies[i]);
-		}
-
-		gameWindow->display();
 	}
 
-	return 0;
+	return -1;
+}
+void Level::update()
+{
+	updatePlayer();
+	updateEnemies();
+	updateCollider();
+	updateWindow();
+}
+void Level::updatePlayer()
+{
+	if (attack > 0) 
+	{
+		player.attack(attack);
+
+		if (attack == 3) 
+		{
+			to_hit = m_collider->getPattacked();
+			
+			if (to_hit != -1) 
+			{
+				if (!enemies[to_hit]->isDead())
+				{
+					int hplost = player.getDamage();
+					enemies[to_hit]->updateHealth(hplost);
+					m_console.sendMessage("You attacked" + enemies[to_hit]->getName() + " for " + std::to_string(hplost) + " damage!");
+
+					if (enemies[to_hit]->getHealth() < 1){
+						to_kill = to_hit;
+						m_console.sendMessage("Killed " + enemies[to_kill]->getName());
+						enemies[to_kill]->kill();
+						m_collider->removeEnemy(to_kill);
+					}
+				}
+
+				to_hit = -1;
+			}
+		}
+
+		attack--;
+	}
+
+}
+void Level::updateEnemies() 
+{
+	if (e_clock.getElapsedTime().asSeconds() > 1) {
+		for (int i = 0; i < totalEnemies; i++) 
+		{
+			enemies[i]->move();
+			//test if attack
+			/*int hpLost = enemies[i]->attack();
+			m_console.sendMessage(enemies[i]->getName() + " attacked you for " + std::to_string(hpLost) + " damage!");
+			player.removeHealth(hpLost);
+			m_pstats.updateHealth(player.getCurHealth());
+
+			if (player.getCurHealth() < 1) {
+				m_pstats.updateHealth(0);
+				main_ret = 0;*/
+		}
+		e_clock.restart();
+	}
+
+	if (kill_clock.getElapsedTime().asSeconds() > .25)
+	{
+		for (int i = 0; i < totalEnemies; i++)
+		{
+			if (enemies[i]->isDead()) {
+				if (enemies[i]->killAnimation()) {
+					kill(i);
+				}
+			}
+		}
+
+		kill_clock.restart();
+	}
+}
+void Level::updateWindow()
+{
+	g_window->clear();
+
+	g_window->setView(gameView);
+	//GUIs
+	g_window->draw(m_console);
+	g_window->draw(m_pstats);
+	//still just rects
+	g_window->draw(Tooltip);
+	g_window->draw(Inventory);
+	g_window->draw(Toolbar);
+
+	g_window->draw(m_minimap);
+
+	g_window->setView(mm_view);
+	g_window->draw(*currentRoom);
+
+	g_window->setView(levelView);
+	g_window->draw(*currentRoom);
+	g_window->draw(player);
+	for (int i = 0; i < totalEnemies; i++) {
+		g_window->draw(*enemies[i]);
+	}
+
+	g_window->draw(gameOver);
+
+	g_window->display();
+
 }
 void Level::adjustView()
 {
@@ -197,9 +265,9 @@ void Level::adjustView()
 
 	}
 }
-bool Level::changeRoom()
+int Level::changeRoom(int choice)
 {
-	if (collided_with == 2)
+	if (choice == 3)
 	{
 		roomIter++;
 
@@ -222,7 +290,7 @@ bool Level::changeRoom()
 		m_console.sendMessage("It's filled with " + enemies[0]->getName() + "s");
 
 	}
-	else if(collided_with == 1)
+	else if(choice == 2)
 	{
 		if (roomIter != 0) 
 		{
@@ -238,8 +306,7 @@ bool Level::changeRoom()
 		}
 	}
 
-	collided_with = 0;
-	return false;
+	return 2;
 }
 void Level::updateMiniMap()
 {
@@ -260,7 +327,7 @@ void Level::setUpEnemies(int room_iter)
 
 	for (int i = 0; i < allEnemies[room_iter].size(); i++)
 	{
-		Enemy* new_enemy = new Enemy(allEnemies[room_iter][i].filename, allEnemies[room_iter][i].position, allEnemies[room_iter][i].size, i + 1, "Infected Buff Skeleton", m_collider);
+		Enemy* new_enemy = new Enemy(allEnemies[room_iter][i], i + 1, allEnemies[room_iter][i].displayname, m_collider);
 		enemies.push_back(new_enemy);
 		enemies[i]->addPath(allEnemies[room_iter][i].path);
 		totalEnemies++;
@@ -273,8 +340,7 @@ void Level::updateCollider()
 {
 	m_collider->updatePlayer(player.getRect());
 
-	for (int i = 0; i < totalEnemies; i++)
-	{
+	for (int i = 0; i < m_collider->getTotalEnemies(); i++){
 		m_collider->updateEnemy(enemies[i]->getRect(), i);
 	}
 }
@@ -289,7 +355,63 @@ void Level::kill(int to_kill)
 		totalEnemies = 0;
 	}
 
-	m_collider->removeEnemy(to_kill);
+	//m_collider->removeEnemy(to_kill);
+}
+void Level::killPlayer()
+{
+	sf::Clock pkill_Clock;
+	//run death animation
+	while (true) {
+		if (pkill_Clock.getElapsedTime().asSeconds() > .25) {
+			if (player.kill()) {
+				//updateWindow();
+				break;
+			}
+			updateWindow();
+			pkill_Clock.restart();
+		}
+	}
 
-	collided_with = 0;
+	//slowly fade screen out
+	sf::Color go_Color = sf::Color(255, 255, 255, 0);
+
+	while (int(go_Color.a) < 255)
+	{
+		if (pkill_Clock.getElapsedTime().asSeconds() > .25)
+		{
+			go_Color.a += 17;
+			
+			gameOver.setFillColor(go_Color);
+			updateWindow();
+
+			pkill_Clock.restart();
+		}
+	}
+
+
+	//go back to level x room 1
+}
+void Level::resetLevel(int level_num)
+{
+	cur_level = level_num;
+	//totalRooms = 0;
+	roomIter = 0;
+	main_ret = 2;
+	totalEnemies = 0;
+
+	levelView.reset(sf::FloatRect(0, 0, 250, 150));
+	levelView.setViewport(sf::FloatRect(0, 0, .85, .75));
+	viewCenter.left = levelView.getCenter().x - 100;
+	viewCenter.top = levelView.getCenter().y - 50;
+	viewCenter.height = 84;
+	viewCenter.width = 184;
+
+	mm_view.setViewport(sf::FloatRect(.86, .07, .13, .15));
+
+	gameOver.setSize(sf::Vector2f(g_window->getSize().x, g_window->getSize().y));
+	gameOver.setPosition(0, 0);
+	sf::Color go_Color = sf::Color(255, 255, 255, 0);
+	gameOver.setFillColor(go_Color);
+
+	m_console.reset();
 }

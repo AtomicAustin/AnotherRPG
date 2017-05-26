@@ -27,7 +27,7 @@ void GameConsole::create(std::string filename, sf::Vector2f position)
 	firstLinePosition.x = position.x + 15;
 	firstLinePosition.y = position.y + m_sprite.getGlobalBounds().height - 30;
 
-	m_font.loadFromFile(FONT_NAME);
+	m_font.loadFromFile(GENERIC_FONT);
 
 	sf::Text newMessage("Level has begun!", m_font, FONT_SIZE);
 	newMessage.setPosition(firstLinePosition);
@@ -56,6 +56,15 @@ void GameConsole::sendMessage(std::string message)
 	displayedText[0] = newMessage;
 
 }
+void GameConsole::reset()
+{
+	displayedText.clear();
+	sf::Text newMessage("Level has begun!", m_font, FONT_SIZE);
+	newMessage.setPosition(firstLinePosition);
+
+	displayedText.push_back(newMessage);
+	displayedNum = 1;
+}
 void GameConsole::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	// apply the transform
@@ -71,11 +80,11 @@ void GameConsole::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 PlayerStats::PlayerStats()
 {}
-PlayerStats::PlayerStats(std::string filename, sf::Vector2f position, int totalHealth)
+PlayerStats::PlayerStats(std::string filename, std::string portrait, sf::Vector2f position, int totalHealth)
 {
-	create(filename, position, totalHealth);
+	create(filename, portrait, position, totalHealth);
 }
-void PlayerStats::create(std::string filename, sf::Vector2f position, int totalHealth)
+void PlayerStats::create(std::string filename, std::string portrait, sf::Vector2f position, int totalHealth)
 {
 	this->totalHealth = totalHealth;
 
@@ -83,10 +92,15 @@ void PlayerStats::create(std::string filename, sf::Vector2f position, int totalH
 	m_sprite.setTexture(m_texture);
 	m_sprite.setScale(10, 10);
 	m_sprite.setPosition(position);
+
+	m_portraitTexture.loadFromFile(portrait);
+	m_portrait.setTexture(m_portraitTexture);
+	m_portrait.setScale(10, 10);
+	m_portrait.setPosition(position.x + 20, position.y + 20);
 	
 	textPosition.x = position.x + 215;
 	textPosition.y = position.y + 27;
-	m_font.loadFromFile(FONT_NAME);
+	m_font.loadFromFile(GENERIC_FONT);
 	healthDisplay.setFont(m_font);
 	healthDisplay.setCharacterSize(18);
 	healthDisplay.setPosition(textPosition);
@@ -106,7 +120,7 @@ void PlayerStats::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.transform *= getTransform();
 
 	target.draw(m_sprite, states);
-
+	target.draw(m_portrait, states);
 	target.draw(healthDisplay, states);
 }
 
@@ -126,7 +140,7 @@ void MiniMap::create(std::string filename, sf::Vector2f position, std::string le
 	lr_pos.x = position.x + 35;
 	lr_pos.y = position.y + 22;
 
-	m_font.loadFromFile(FONT_NAME);
+	m_font.loadFromFile(GENERIC_FONT);
 	cur_lr.setFont(m_font);
 	cur_lr.setCharacterSize(18);
 	cur_lr.setPosition(lr_pos);

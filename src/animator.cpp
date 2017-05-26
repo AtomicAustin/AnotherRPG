@@ -22,22 +22,66 @@ Animator::Animator(sf::Sprite* n_sprite, sf::Vector2i size)
 		m_sprite->move(0, -(yDiff));
 	}
 
-	h_iter = m_textureRect.height;
-	v_iter = m_textureRect.width;
+	s_height = m_textureRect.height;
+	s_width = m_textureRect.width;
+	d_iter = 0;
 
 	m_sprite->setTextureRect(m_textureRect);
+	
+	death = false;
 }
-void Animator::direction(int dir)
+void Animator::direction(MoveDirections dir)
 {
 	switch (dir)
 	{
-		case 1: {m_textureRect.top = 0; break; }
-		case -1: {m_textureRect.top = h_iter; break; }
-		case 2: {m_textureRect.left = 0; break; }
-		case -2: {m_textureRect.left = v_iter; break; }
+		case RIGHT: {m_textureRect.top = 0; break; }
+		case LEFT: {m_textureRect.top = s_height; break; }
+		case DOWN: {m_textureRect.left = 0; break; }
+		case UP: {m_textureRect.left = s_width; break; }
 	}
 
 	m_sprite->setTextureRect(m_textureRect);
+}
+void Animator::attackAnim(int attack_iter)
+{
+	//iterate through attack animation based on attack iterator
+}
+void Animator::addDeath(sf::Vector2f dimensions, sf::Vector2f move, int tot_iter)
+{
+	if (tot_iter != 0) {
+		death = true;
+	}
+	else {
+		return;
+	}
+
+	m_deathRect.left = 0;
+	m_deathRect.top = s_height * 2;
+	m_deathRect.width = dimensions.x;
+	m_deathRect.height = dimensions.y;
+
+	death_x = dimensions.x;
+	d_move = move;
+	max_iter = tot_iter;
+}
+bool Animator::deathAnim()
+{
+	if (!death) {
+		return true;
+	}
+
+	if (d_iter == 0) {
+		m_sprite->move(d_move);
+	}
+
+	m_deathRect.left = death_x * d_iter;
+	m_sprite->setTextureRect(m_deathRect);
+	d_iter++;
+
+	if (d_iter >= max_iter) {
+		return true;
+	}
+	return false;
 }
 Animator::~Animator()
 {
