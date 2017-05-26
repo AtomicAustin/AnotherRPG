@@ -17,37 +17,48 @@ public:
 	Level(int);
 	~Level();
 	void addRoom(RoomInstructions, std::vector<EnemyInstructions>);
-	int runLevel(sf::RenderWindow*);
+	int runLevel(sf::RenderWindow*, PlayerInstructions);
+	void update();
+	void updatePlayer();
+	void updateEnemies();
+	void updateWindow();
 	void adjustView();
-	bool changeRoom();
+	int changeRoom(int);
 	void updateMiniMap();
 	void setUpEnemies(int);
 	void updateCollider();
 	void kill(int);
+	void killPlayer();
+	void resetLevel(int);
 
 private:
+
+	sf::RenderWindow* g_window;
+	sf::RectangleShape gameOver;
 
 	//rooms
 	std::vector<RoomInstructions> allRooms;
 	//std::vector<Room*> rooms;
 	Room* currentRoom;
 	int cur_level, totalRooms, roomIter;
-	bool nextLevel;
+	int main_ret;
 
 	//enemies
 	std::vector<std::vector<EnemyInstructions>> allEnemies;
 	std::vector<Enemy*> enemies;
 	int totalEnemies;
-
+	int to_kill;
+	int to_hit;
 
 	//clocks
-	sf::Clock clock, e_clock, roomChangeClock;
+	sf::Clock e_clock, kill_clock, roomChangeClock;
 
 
 	//player
 	Player player;
 	Collider* m_collider;
-	int collided_with;
+	int move_dir;
+	int attack;
 
 
 	//views

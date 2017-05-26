@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <SFML\Graphics.hpp>
+#include "types.h"
 
 class GUI : public sf::Transformable, public sf::Drawable
 {
@@ -14,7 +15,6 @@ protected:
 	sf::Texture m_texture;
 	sf::Font m_font;
 	int FONT_SIZE = 12;
-	std::string FONT_NAME = "SFPixelate.ttf";
 };
 
 class GameConsole : public GUI
@@ -24,6 +24,7 @@ public:
 	GameConsole(std::string, sf::Vector2f);
 	void create(std::string, sf::Vector2f);
 	void sendMessage(std::string);
+	void reset();
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 private:
@@ -36,8 +37,8 @@ class PlayerStats : public GUI
 {
 public:
 	PlayerStats();
-	PlayerStats(std::string, sf::Vector2f, int);
-	void create(std::string, sf::Vector2f, int);
+	PlayerStats(std::string, std::string, sf::Vector2f, int);
+	void create(std::string, std::string, sf::Vector2f, int);
 	void updateHealth(int);
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
@@ -46,6 +47,9 @@ private:
 	int totalHealth;
 	int currentHealth;
 	sf::Text healthDisplay;
+
+	sf::Texture m_portraitTexture;
+	sf::Sprite m_portrait;
 };
 
 class MiniMap : public GUI
